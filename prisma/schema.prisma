@@ -1,0 +1,407 @@
+// CarTalker App Prisma Schema
+// A comprehensive vehicle tracking and maintenance system
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vehicles           Vehicle[]
+  maintenanceRecords MaintenanceRecord[]
+  issues             Issue[]
+  chatConversations  ChatConversation[]
+  serviceReminders   ServiceReminder[]
+  documents          Document[]
+
+  @@map("users")
+}
+
+model Vehicle {
+  id                String   @id @default(cuid())
+  vin               String   @unique
+  year              Int?
+  make              String?
+  model             String?
+  trim              String?
+  engine            String?
+  transmission      String?
+  driveType         String?
+  fuelType          String?
+  bodyClass         String?
+  manufacturerName  String?
+  plantCity         String?
+  plantState        String?
+  plantCountry      String?
+  nickname          String?
+  color             String?
+  mileage           Int?
+  purchaseDate      DateTime?
+  purchasePrice     Float?
+  currentValue      Float?
+  notes             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  userId             String
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  maintenanceRecords MaintenanceRecord[]
+  issues             Issue[]
+  chatConversations  ChatConversation[]
+  importedReports    ImportedReport[]
+  serviceReminders   ServiceReminder[]
+  documents          Document[]
+
+  @@map("vehicles")
+}
+
+model MaintenanceRecord {
+  id          String                 @id @default(cuid())
+  type        MaintenanceType
+  category    ServiceCategory
+  title       String
+  description String?
+
+  // Cost breakdown
+  totalCost   Float?
+  partsCost   Float?
+  laborCost   Float?
+
+  // Service details
+  mileage     Int?
+  date        DateTime
+  nextServiceDue DateTime?
+  nextServiceMileage Int?
+
+  // Service provider
+  serviceBy   String? // Shop name or person
+  shopAddress String?
+  shopPhone   String?
+
+  // Service specifics (JSON for flexibility)
+  serviceDetails String? // JSON with service-specific data
+
+  // Documentation
+  notes       String?
+  warrantyInfo String? // Warranty details
+  receiptImages String? // JSON array of image URLs/paths
+
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  reminders ServiceReminder[]
+  documents Document[]
+
+  @@map("maintenance_records")
+}
+
+model Issue {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  severity    Severity
+  status      IssueStatus @default(OPEN)
+  cost        Float?
+  mileage     Int?
+  dateFound   DateTime
+  dateFixed   DateTime?
+  fixedBy     String? // Shop name or person
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("issues")
+}
+
+model ChatConversation {
+  id        String        @id @default(cuid())
+  title     String
+  context   String? // Additional context about the conversation
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  vehicleId String?
+  vehicle   Vehicle?      @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  ChatMessage[]
+
+  @@map("chat_conversations")
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  role      ChatRole
+  content   String
+  createdAt DateTime @default(now())
+
+  conversationId String
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+enum MaintenanceType {
+  // Oil & Filters
+  OIL_CHANGE
+  OIL_FILTER
+  AIR_FILTER
+  CABIN_FILTER
+  FUEL_FILTER
+
+  // Tires & Wheels
+  TIRE_ROTATION
+  TIRE_REPLACEMENT
+  WHEEL_ALIGNMENT
+  WHEEL_BALANCE
+
+  // Brakes
+  BRAKE_PADS
+  BRAKE_ROTORS
+  BRAKE_FLUID
+  BRAKE_INSPECTION
+
+  // Engine & Performance
+  SPARK_PLUGS
+  IGNITION_COILS
+  TIMING_BELT
+  WATER_PUMP
+  SERPENTINE_BELT
+
+  // Transmission & Drivetrain
+  TRANSMISSION_SERVICE
+  TRANSMISSION_FLUID
+  DIFFERENTIAL_SERVICE
+  CLUTCH_SERVICE
+
+  // Fluids
+  COOLANT_FLUSH
+  POWER_STEERING_FLUID
+  WINDSHIELD_WASHER
+
+  // Electrical
+  BATTERY
+  ALTERNATOR
+  STARTER
+
+  // Suspension & Steering
+  SHOCKS_STRUTS
+  STEERING_SERVICE
+
+  // HVAC
+  AC_SERVICE
+  HEATER_SERVICE
+
+  // General
+  INSPECTION
+  RECALL_SERVICE
+  WARRANTY_REPAIR
+  ACCIDENT_REPAIR
+  UPGRADE
+  MODIFICATION
+  OTHER
+}
+
+enum ServiceCategory {
+  ENGINE
+  TRANSMISSION
+  BRAKES
+  TIRES
+  ELECTRICAL
+  SUSPENSION
+  HVAC
+  FLUIDS
+  FILTERS
+  INSPECTION
+  REPAIR
+  UPGRADE
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  FIXED
+  DEFERRED
+  WONT_FIX
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+model ImportedReport {
+  id           String               @id @default(cuid())
+  source       String               // "GoodCar", "Carfax", "AutoCheck", etc.
+  reportType   ImportedReportType
+  reportData   String               // JSON string of parsed report data
+  rawData      String?              // Original uploaded text/JSON
+  summary      String?              // Brief summary of key findings
+  importedAt   DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  vehicleId    String
+  vehicle      Vehicle              @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("imported_reports")
+}
+
+model ServiceReminder {
+  id                String   @id @default(cuid())
+  title             String
+  description       String?
+  reminderType      ReminderType
+
+  // Trigger conditions
+  dueMileage        Int?
+  dueDate           DateTime?
+  intervalMiles     Int?
+  intervalMonths    Int?
+
+  // Status
+  isActive          Boolean  @default(true)
+  isCompleted       Boolean  @default(false)
+  completedAt       DateTime?
+
+  // Relations
+  maintenanceRecordId String?
+  maintenanceRecord   MaintenanceRecord? @relation(fields: [maintenanceRecordId], references: [id], onDelete: Cascade)
+  vehicleId         String
+  vehicle           Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("service_reminders")
+}
+
+enum ReminderType {
+  MILEAGE_BASED
+  TIME_BASED
+  COMBINED
+}
+
+enum ImportedReportType {
+  HISTORY_REPORT    // Comprehensive vehicle history (GoodCar, Carfax)
+  ACCIDENT_REPORT   // Accident-specific report
+  SERVICE_REPORT    // Service/maintenance history
+  OWNERSHIP_REPORT  // Previous ownership details
+  RECALL_REPORT     // Manufacturer recalls
+  OTHER
+}
+
+model Document {
+  id          String         @id @default(cuid())
+  filename    String
+  originalName String
+  fileType    String         // MIME type
+  fileSize    Int            // Size in bytes
+  filePath    String         // Storage path
+  thumbnailPath String?      // Thumbnail image path
+
+  // Document categorization
+  category    DocumentCategory
+  type        DocumentType
+  tags        String?        // JSON array of tags
+
+  // OCR and processing
+  ocrText     String?        // Extracted text
+  ocrConfidence Float?       // Overall confidence score
+  extractedData String?      // JSON of structured data
+  processingStatus ProcessingStatus @default(PENDING)
+  processingError String?    // Error message if processing failed
+
+  // Manual review
+  reviewStatus ReviewStatus @default(PENDING)
+  reviewedAt   DateTime?
+  reviewNotes  String?
+
+  // Document metadata
+  documentDate DateTime?     // Date from document content
+  mileage     Int?          // Mileage from document
+  totalCost   Float?        // Total cost from document
+  shopName    String?       // Service provider name
+
+  // Relations
+  vehicleId   String?
+  vehicle     Vehicle?       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Link to maintenance record if created from this document
+  maintenanceRecordId String?
+  maintenanceRecord   MaintenanceRecord? @relation(fields: [maintenanceRecordId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@map("documents")
+}
+
+enum DocumentCategory {
+  RECEIPT           // Service receipts
+  INVOICE           // Detailed invoices
+  INSPECTION        // State inspections, emissions tests
+  WARRANTY          // Warranty documents
+  MANUAL            // Owner's manuals, service manuals
+  INSURANCE         // Insurance cards, claims
+  REGISTRATION      // Vehicle registration documents
+  TITLE             // Vehicle title documents
+  ESTIMATE          // Repair estimates
+  OTHER
+}
+
+enum DocumentType {
+  IMAGE_JPG
+  IMAGE_PNG
+  IMAGE_HEIC
+  IMAGE_WEBP
+  PDF
+  OTHER
+}
+
+enum ProcessingStatus {
+  PENDING           // Not yet processed
+  IN_PROGRESS       // Currently being processed
+  COMPLETED         // Successfully processed
+  FAILED            // Processing failed
+  SKIPPED           // Skipped processing (user choice)
+}
+
+enum ReviewStatus {
+  PENDING           // Needs manual review
+  APPROVED          // Reviewed and approved
+  REJECTED          // Reviewed and rejected
+  NEEDS_CORRECTION  // Needs data correction
+  SKIP_REVIEW       // User chose to skip review
+}

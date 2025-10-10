@@ -1,26 +1,98 @@
 @import "tailwindcss";
 
+/* CarTalker Design System - Notebook Vibe */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Notebook Colors */
+  --notebook-black: #1a1a1a;
+  --notebook-white: #f8f8f6;
+  --marble-gray: #6b6b6b;
+  --tire-black: #262626;
+
+  /* Accent Colors */
+  --savings-green: #10b981;
+  --warning-amber: #f59e0b;
+  --danger-red: #ef4444;
+  --info-blue: #3b82f6;
+
+  /* Notebook Theme Accents */
+  --ruled-line-blue: #a3c9f5;
+  --margin-red: #dc2626;
+  --yellow-highlight: #fef08a;
+
+  /* Semantic tokens */
+  --background: var(--notebook-white);
+  --foreground: var(--notebook-black);
 }
 
 @theme inline {
+  /* Colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-notebook-black: var(--notebook-black);
+  --color-notebook-white: var(--notebook-white);
+  --color-marble-gray: var(--marble-gray);
+  --color-tire-black: var(--tire-black);
+  --color-savings-green: var(--savings-green);
+  --color-warning-amber: var(--warning-amber);
+  --color-danger-red: var(--danger-red);
+  --color-info-blue: var(--info-blue);
+  --color-ruled-line-blue: var(--ruled-line-blue);
+  --color-margin-red: var(--margin-red);
+  --color-yellow-highlight: var(--yellow-highlight);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Typography - Notebook feel with monospace headers */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'Courier New', 'Courier', monospace;
+  --font-handwriting: 'Caveat', 'Patrick Hand', cursive;
+
+  /* Spacing tweaks for notebook aesthetic */
+  --radius-base: 0.375rem;
+  --radius-card: 0.25rem;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Notebook paper texture background (optional subtle effect) */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 31px,
+      var(--ruled-line-blue) 31px,
+      var(--ruled-line-blue) 32px
+    );
+  opacity: 0.15;
+  z-index: 0;
+}
+
+/* Ensure content sits above the texture */
+#__next,
+main {
+  position: relative;
+  z-index: 1;
+}
+
+/* Headings use monospace for notebook vibe */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }

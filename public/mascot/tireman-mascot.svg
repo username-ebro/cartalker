@@ -1,0 +1,29 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tire body -->
+  <circle cx="100" cy="100" r="60" fill="#262626" stroke="#1a1a1a" stroke-width="4"/>
+  <circle cx="100" cy="100" r="45" fill="none" stroke="#4a4a4a" stroke-width="3"/>
+  <circle cx="100" cy="100" r="30" fill="none" stroke="#6b6b6b" stroke-width="2"/>
+
+  <!-- Tire tread pattern -->
+  <path d="M 100 40 L 100 50" stroke="#4a4a4a" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 100 150 L 100 160" stroke="#4a4a4a" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 40 100 L 50 100" stroke="#4a4a4a" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 150 100 L 160 100" stroke="#4a4a4a" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Eyes -->
+  <ellipse cx="85" cy="90" rx="8" ry="12" fill="#f8f8f6"/>
+  <ellipse cx="115" cy="90" rx="8" ry="12" fill="#f8f8f6"/>
+  <circle cx="85" cy="92" r="4" fill="#1a1a1a"/>
+  <circle cx="115" cy="92" r="4" fill="#1a1a1a"/>
+
+  <!-- Smile -->
+  <path d="M 80 110 Q 100 125, 120 110" fill="none" stroke="#f8f8f6" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Left arm waving -->
+  <path d="M 45 100 Q 30 80, 25 60" fill="none" stroke="#262626" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="25" cy="60" r="6" fill="#262626"/>
+
+  <!-- Right arm (hand on side) -->
+  <path d="M 155 100 Q 170 110, 175 120" fill="none" stroke="#262626" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="175" cy="120" r="6" fill="#262626"/>
+</svg>
