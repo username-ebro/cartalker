@@ -1,5 +1,8 @@
 import { VehicleDetail } from '@/components/VehicleDetail';
 import { notFound } from 'next/navigation';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 interface PageProps {
   params: {
@@ -9,17 +12,29 @@ interface PageProps {
 
 async function getVehicle(id: string) {
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/vehicles/${id}`, {
-      cache: 'no-store', // Ensure fresh data
+    const vehicle = await prisma.vehicle.findUnique({
+      where: { id },
+      include: {
+        maintenanceRecords: {
+          orderBy: {
+            date: 'desc',
+          },
+        },
+        issues: {
+          orderBy: {
+            dateFound: 'desc',
+          },
+        },
+        _count: {
+          select: {
+            maintenanceRecords: true,
+            issues: true,
+          },
+        },
+      },
     });
 
-    if (!response.ok) {
-      return null;
-    }
-
-    const data = await response.json();
-    return data.success ? data.data : null;
+    return vehicle;
   } catch (error) {
     console.error('Error fetching vehicle:', error);
     return null;
@@ -27,7 +42,9 @@ async function getVehicle(id: string) {
 }
 
 export default async function VehicleDetailPage({ params }: PageProps) {
-  const vehicle = await getVehicle(params.id);
+  // In Next.js 15, params must be awaited before accessing properties
+  const resolvedParams = await params;
+  const vehicle = await getVehicle(resolvedParams.id);
 
   if (!vehicle) {
     notFound();

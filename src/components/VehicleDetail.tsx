@@ -41,12 +41,26 @@ interface VehicleDetailProps {
   vehicle: Vehicle;
 }
 
-export function VehicleDetail({ vehicle }: VehicleDetailProps) {
+export function VehicleDetail({ vehicle: initialVehicle }: VehicleDetailProps) {
+  const [vehicle, setVehicle] = useState(initialVehicle);
   const [activeTab, setActiveTab] = useState('overview');
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [importedReports, setImportedReports] = useState<any[]>([]);
   const [reportText, setReportText] = useState('');
   const [isImporting, setIsImporting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Edit form state
+  const [editNickname, setEditNickname] = useState(vehicle.nickname || '');
+  const [editColor, setEditColor] = useState(vehicle.color || '');
+  const [editMileage, setEditMileage] = useState(vehicle.mileage?.toString() || '');
+  const [editNotes, setEditNotes] = useState(vehicle.notes || '');
+
+  // Quick mileage update
+  const [isEditingMileage, setIsEditingMileage] = useState(false);
+  const [quickMileage, setQuickMileage] = useState(vehicle.mileage?.toString() || '');
+  const [isUpdatingMileage, setIsUpdatingMileage] = useState(false);
 
   const tabs = [
     { id: 'overview', name: 'Overview', icon: Car },
@@ -119,6 +133,73 @@ export function VehicleDetail({ vehicle }: VehicleDetailProps) {
     }
   };
 
+  // Handle vehicle update
+  const handleUpdateVehicle = async () => {
+    setIsUpdating(true);
+    try {
+      const response = await fetch(`/api/vehicles/${vehicle.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nickname: editNickname,
+          color: editColor,
+          mileage: editMileage,
+          notes: editNotes,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setVehicle(data.data);
+        setShowEditModal(false);
+        alert('Vehicle updated successfully!');
+      } else {
+        alert(`Error updating vehicle: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error updating vehicle:', error);
+      alert('Error updating vehicle. Please try again.');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Handle quick mileage update
+  const handleQuickMileageUpdate = async () => {
+    if (!quickMileage || quickMileage === vehicle.mileage?.toString()) {
+      setIsEditingMileage(false);
+      return;
+    }
+
+    setIsUpdatingMileage(true);
+    try {
+      const response = await fetch(`/api/vehicles/${vehicle.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mileage: quickMileage,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setVehicle(data.data);
+        setIsEditingMileage(false);
+      } else {
+        alert(`Error updating mileage: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error updating mileage:', error);
+      alert('Error updating mileage. Please try again.');
+    } finally {
+      setIsUpdatingMileage(false);
+    }
+  };
+
   // Load reports when switching to reports tab
   if (activeTab === 'reports' && importedReports.length === 0) {
     loadReports();
@@ -146,7 +227,10 @@ export function VehicleDetail({ vehicle }: VehicleDetailProps) {
               <MessageCircle className="w-4 h-4 mr-2" />
               Chat About This Car
             </Link>
-            <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+            >
               <Edit className="w-4 h-4 mr-2" />
               Edit Details
             </button>
@@ -157,14 +241,56 @@ export function VehicleDetail({ vehicle }: VehicleDetailProps) {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <Gauge className="w-8 h-8 text-blue-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Current Mileage</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {vehicle.mileage ? vehicle.mileage.toLocaleString() : 'N/A'}
-              </p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center flex-1">
+              <Gauge className="w-8 h-8 text-blue-600" />
+              <div className="ml-4 flex-1">
+                <p className="text-sm font-medium text-gray-600">Current Mileage</p>
+                {isEditingMileage ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <input
+                      type="number"
+                      value={quickMileage}
+                      onChange={(e) => setQuickMileage(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleQuickMileageUpdate()}
+                      className="w-32 px-2 py-1 text-xl font-semibold border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      autoFocus
+                      disabled={isUpdatingMileage}
+                    />
+                    <button
+                      onClick={handleQuickMileageUpdate}
+                      disabled={isUpdatingMileage}
+                      className="px-2 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {isUpdatingMileage ? '...' : '✓'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsEditingMileage(false);
+                        setQuickMileage(vehicle.mileage?.toString() || '');
+                      }}
+                      className="px-2 py-1 text-sm bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                      disabled={isUpdatingMileage}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-2xl font-semibold text-gray-900">
+                    {vehicle.mileage ? vehicle.mileage.toLocaleString() : 'N/A'}
+                  </p>
+                )}
+              </div>
             </div>
+            {!isEditingMileage && (
+              <button
+                onClick={() => setIsEditingMileage(true)}
+                className="ml-2 p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                title="Update mileage"
+              >
+                <Edit className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -565,6 +691,102 @@ export function VehicleDetail({ vehicle }: VehicleDetailProps) {
                 className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isImporting ? 'Importing...' : 'Import Report'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Edit Vehicle Details</h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Nickname */}
+              <div>
+                <label htmlFor="editNickname" className="block text-sm font-medium text-gray-700 mb-1">
+                  Nickname
+                </label>
+                <input
+                  type="text"
+                  id="editNickname"
+                  value={editNickname}
+                  onChange={(e) => setEditNickname(e.target.value)}
+                  placeholder="e.g., Daily Driver, The Beast"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              {/* Color */}
+              <div>
+                <label htmlFor="editColor" className="block text-sm font-medium text-gray-700 mb-1">
+                  Color
+                </label>
+                <input
+                  type="text"
+                  id="editColor"
+                  value={editColor}
+                  onChange={(e) => setEditColor(e.target.value)}
+                  placeholder="e.g., Red, Blue Metallic"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              {/* Mileage */}
+              <div>
+                <label htmlFor="editMileage" className="block text-sm font-medium text-gray-700 mb-1">
+                  Current Mileage
+                </label>
+                <input
+                  type="number"
+                  id="editMileage"
+                  value={editMileage}
+                  onChange={(e) => setEditMileage(e.target.value)}
+                  placeholder="e.g., 85000"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label htmlFor="editNotes" className="block text-sm font-medium text-gray-700 mb-1">
+                  Notes
+                </label>
+                <textarea
+                  id="editNotes"
+                  value={editNotes}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  placeholder="Any additional notes about this vehicle..."
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                disabled={isUpdating}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateVehicle}
+                disabled={isUpdating}
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isUpdating ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </div>
