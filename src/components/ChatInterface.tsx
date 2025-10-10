@@ -1,13 +1,16 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Car } from 'lucide-react';
+import { Send, Bot, User, Mic } from 'lucide-react';
+import { VoiceInput } from './VoiceInput';
+import { InlineRating } from './RatingButton';
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  rating?: 'up' | 'down' | null;
 }
 
 export function ChatInterface() {
@@ -15,12 +18,13 @@ export function ChatInterface() {
     {
       id: '1',
       role: 'assistant',
-      content: "Hello! I'm your car assistant. I can help you with maintenance questions, troubleshoot issues, and provide advice about your vehicles. What would you like to know?",
+      content: "Hello! I'm Tireman, your car advisor. I can help you save money, avoid scams, and make smart decisions about your vehicles. What would you like to know?",
       timestamp: new Date(),
     }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [useVoice, setUseVoice] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -120,13 +124,15 @@ export function ChatInterface() {
   return (
     <div className="bg-white rounded-lg shadow-lg h-[600px] flex flex-col">
       {/* Chat Header */}
-      <div className="flex items-center space-x-3 p-4 border-b border-gray-200">
-        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-          <Bot className="w-5 h-5 text-white" />
-        </div>
+      <div className="flex items-center space-x-3 p-4 border-b-2 border-marble-gray bg-notebook-white">
+        <img
+          src="/mascot/tireman-mascot.svg"
+          alt="Tireman"
+          className="w-10 h-10"
+        />
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Car Assistant</h3>
-          <p className="text-sm text-gray-500">Ask me anything about car maintenance!</p>
+          <h3 className="text-lg font-mono font-bold text-notebook-black">Tireman</h3>
+          <p className="text-sm text-marble-gray">Your car-savvy advisor</p>
         </div>
       </div>
 
@@ -157,15 +163,30 @@ export function ChatInterface() {
                 <div
                   className={`px-4 py-2 rounded-lg ${
                     message.role === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-900'
+                      ? 'bg-tire-black text-white'
+                      : 'bg-gray-100 text-notebook-black border border-marble-gray'
                   }`}
                 >
                   <p className="text-sm">{message.content}</p>
                 </div>
-                <p className="text-xs text-gray-500 mt-1 px-1">
-                  {formatTime(message.timestamp)}
-                </p>
+                <div className="flex items-center gap-2 mt-1 px-1">
+                  <p className="text-xs text-marble-gray">
+                    {formatTime(message.timestamp)}
+                  </p>
+                  {message.role === 'assistant' && (
+                    <InlineRating
+                      value={message.rating}
+                      onChange={(rating) => {
+                        setMessages(prev =>
+                          prev.map(m =>
+                            m.id === message.id ? { ...m, rating } : m
+                          )
+                        );
+                      }}
+                      size="sm"
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -193,23 +214,50 @@ export function ChatInterface() {
 
       {/* Input Form */}
       <div className="border-t border-gray-200 p-4">
-        <form onSubmit={handleSubmit} className="flex space-x-3">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about maintenance, troubleshooting, or car advice..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            disabled={isLoading}
-          />
-          <button
-            type="submit"
-            disabled={!input.trim() || isLoading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            <Send className="w-4 h-4" />
-          </button>
-        </form>
+        {!useVoice ? (
+          <form onSubmit={handleSubmit} className="flex space-x-3">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask about maintenance, troubleshooting, or car advice..."
+              className="flex-1 px-4 py-2 border-2 border-marble-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-info-blue focus:border-info-blue"
+              disabled={isLoading}
+            />
+            <button
+              type="button"
+              onClick={() => setUseVoice(true)}
+              className="px-4 py-2 border-2 border-marble-gray text-notebook-black bg-white rounded-lg hover:bg-gray-100 transition-colors"
+              disabled={isLoading}
+            >
+              <Mic className="w-4 h-4" />
+            </button>
+            <button
+              type="submit"
+              disabled={!input.trim() || isLoading}
+              className="px-4 py-2 bg-tire-black text-white rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-info-blue disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </form>
+        ) : (
+          <div className="space-y-3">
+            <VoiceInput
+              onTranscriptChange={(text) => setInput(text)}
+              onFinalTranscript={(text) => {
+                setInput(text);
+                setUseVoice(false);
+              }}
+              placeholder="Tap to speak your question..."
+            />
+            <button
+              onClick={() => setUseVoice(false)}
+              className="text-sm text-marble-gray hover:text-notebook-black transition-colors"
+            >
+              ← Back to typing
+            </button>
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="mt-3 flex flex-wrap gap-2">
