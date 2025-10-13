@@ -115,6 +115,51 @@ function parseServiceType(description: string): string | null {
 }
 
 /**
+ * Map service interval types to Prisma MaintenanceType enum
+ * Some services (like ENGINE_FLUSH) don't exist in the enum, so we return null
+ */
+function mapToPrismaMaintenanceType(serviceType: string): string | null {
+  const mapping: Record<string, string> = {
+    // Direct matches
+    'OIL_CHANGE': 'OIL_CHANGE',
+    'OIL_FILTER': 'OIL_FILTER',
+    'SPARK_PLUGS': 'SPARK_PLUGS',
+    'TIRE_ROTATION': 'TIRE_ROTATION',
+    'ALTERNATOR': 'ALTERNATOR',
+    'STARTER': 'STARTER',
+    'BATTERY_REPLACEMENT': 'BATTERY',
+    'COOLANT_FLUSH': 'COOLANT_FLUSH',
+
+    // Map to broader categories
+    'ENGINE_AIR_FILTER': 'AIR_FILTER',
+    'CABIN_AIR_FILTER': 'CABIN_FILTER',
+    'FUEL_FILTER': 'FUEL_FILTER',
+    'TRANSMISSION_FLUSH': 'TRANSMISSION_SERVICE',
+    'TRANSMISSION_FLUID_CHANGE': 'TRANSMISSION_FLUID',
+    'DIFFERENTIAL_SERVICE': 'DIFFERENTIAL_SERVICE',
+    'BRAKE_PADS_FRONT': 'BRAKE_PADS',
+    'BRAKE_PADS_REAR': 'BRAKE_PADS',
+    'BRAKE_ROTORS': 'BRAKE_ROTORS',
+    'BRAKE_FLUID_FLUSH': 'BRAKE_FLUID',
+    'WHEEL_ALIGNMENT': 'WHEEL_ALIGNMENT',
+    'TIRE_BALANCE': 'WHEEL_BALANCE',
+    'SHOCK_ABSORBERS': 'SHOCKS_STRUTS',
+    'STRUTS': 'SHOCKS_STRUTS',
+
+    // Services that don't exist in enum - map to OTHER
+    'ENGINE_FLUSH': null, // Known scam, skip history lookup
+    'FUEL_SYSTEM_CLEANING': null,
+    'FUEL_INJECTOR_CLEANING': null,
+    'THROTTLE_BODY_CLEANING': null,
+    'POWER_STEERING_FLUSH': 'POWER_STEERING_FLUID',
+    'RADIATOR_FLUSH': null,
+    'THERMOSTAT': null,
+  };
+
+  return mapping[serviceType] || null;
+}
+
+/**
  * Get last maintenance record for a specific service type
  */
 async function getLastServiceForType(
@@ -122,11 +167,17 @@ async function getLastServiceForType(
   serviceType: string
 ): Promise<{ mileage: number | null; date: Date | null }> {
   try {
+    // Map to Prisma enum - if no match, skip database query
+    const prismaType = mapToPrismaMaintenanceType(serviceType);
+    if (!prismaType) {
+      console.log(`No Prisma enum match for ${serviceType}, skipping history lookup`);
+      return { mileage: null, date: null };
+    }
+
     const lastService = await prisma.maintenanceRecord.findFirst({
       where: {
         vehicleId,
-        // Map service type to maintenance type enum
-        type: serviceType as any, // Prisma enum type
+        type: prismaType as any, // Prisma enum type
       },
       orderBy: {
         date: 'desc',
