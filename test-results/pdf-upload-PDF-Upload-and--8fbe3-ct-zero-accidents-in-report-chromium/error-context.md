@@ -1,0 +1,242 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - link "CarTalker" [ref=e7] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e8]:
+          - link "My Cars" [ref=e9] [cursor=pointer]:
+            - /url: /
+            - img [ref=e10]
+            - text: My Cars
+          - link "Maintenance" [ref=e14] [cursor=pointer]:
+            - /url: /maintenance
+            - img [ref=e15]
+            - text: Maintenance
+          - link "Issues" [ref=e17] [cursor=pointer]:
+            - /url: /issues
+            - img [ref=e18]
+            - text: Issues
+          - link "Documents" [ref=e20] [cursor=pointer]:
+            - /url: /documents
+            - img [ref=e21]
+            - text: Documents
+          - link "Chat" [ref=e24] [cursor=pointer]:
+            - /url: /chat
+            - img [ref=e25]
+            - text: Chat
+      - link "Add Vehicle" [ref=e28] [cursor=pointer]:
+        - /url: /vehicles/add
+        - img [ref=e29]
+        - text: Add Vehicle
+  - main [ref=e30]:
+    - generic [ref=e31]:
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - heading "GTI" [level=1] [ref=e35]
+          - paragraph [ref=e36]: 2016 VOLKSWAGEN Golf GTI • 2.0T Base, Performace Pkg. S, SE, Autobahn
+          - paragraph [ref=e37]: "VIN: 3VW447AU9GM030618"
+        - generic [ref=e38]:
+          - link "Chat About This Car" [ref=e39] [cursor=pointer]:
+            - /url: /vehicles/cmglpxreq00036d5l6nm5k1vm/chat
+            - img [ref=e40]
+            - text: Chat About This Car
+          - button "Edit Details" [ref=e42]:
+            - img [ref=e43]
+            - text: Edit Details
+      - generic [ref=e46]:
+        - generic [ref=e48]:
+          - generic [ref=e49]:
+            - img [ref=e50]
+            - generic [ref=e53]:
+              - paragraph [ref=e54]: Current Mileage
+              - paragraph [ref=e55]: 66,000
+          - button "Update mileage" [ref=e56]:
+            - img [ref=e57]
+        - generic [ref=e61]:
+          - img [ref=e62]
+          - generic [ref=e64]:
+            - paragraph [ref=e65]: Maintenance Records
+            - paragraph [ref=e66]: "0"
+        - generic [ref=e68]:
+          - img [ref=e69]
+          - generic [ref=e71]:
+            - paragraph [ref=e72]: Open Issues
+            - paragraph [ref=e73]: "0"
+        - generic [ref=e75]:
+          - img [ref=e76]
+          - generic [ref=e78]:
+            - paragraph [ref=e79]: Estimated Value
+            - paragraph [ref=e80]: N/A
+      - navigation [ref=e82]:
+        - button "Overview" [ref=e83]:
+          - img [ref=e84]
+          - text: Overview
+        - button "Maintenance" [ref=e88]:
+          - img [ref=e89]
+          - text: Maintenance
+        - button "Issues" [ref=e91]:
+          - img [ref=e92]
+          - text: Issues
+        - button "Reports" [ref=e94]:
+          - img [ref=e95]
+          - text: Reports
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - generic [ref=e101]:
+            - heading "Vehicle History Reports" [level=3] [ref=e102]
+            - button "Import Report" [active] [ref=e103]:
+              - img [ref=e104]
+              - text: Import Report
+          - paragraph [ref=e107]: Import vehicle history reports from GoodCar, Carfax, AutoCheck, or other sources to get comprehensive vehicle history.
+        - generic [ref=e108]:
+          - generic [ref=e111]:
+            - generic [ref=e112]:
+              - img [ref=e113]
+              - heading "GoodCar Report" [level=4] [ref=e116]
+              - generic [ref=e117]: HISTORY REPORT
+            - paragraph [ref=e118]: "Issues found: 1 recall. 1 service records."
+            - paragraph [ref=e119]: Imported on Oct 12, 2025
+            - generic [ref=e120]:
+              - generic [ref=e121]:
+                - paragraph [ref=e122]: "0"
+                - paragraph [ref=e123]: Accidents
+              - generic [ref=e124]:
+                - paragraph [ref=e125]: "0"
+                - paragraph [ref=e126]: Owners
+              - generic [ref=e127]:
+                - paragraph [ref=e128]: "1"
+                - paragraph [ref=e129]: Service Records
+              - generic [ref=e130]:
+                - paragraph [ref=e131]: "1"
+                - paragraph [ref=e132]: Recalls
+            - generic [ref=e133]:
+              - heading "Key Findings:" [level=5] [ref=e134]
+              - generic [ref=e135]:
+                - paragraph [ref=e136]: • 1 recall(s) found
+                - paragraph [ref=e137]: • Clean history - no major issues found
+          - generic [ref=e140]:
+            - generic [ref=e141]:
+              - img [ref=e142]
+              - heading "GoodCar Report" [level=4] [ref=e145]
+              - generic [ref=e146]: HISTORY REPORT
+            - paragraph [ref=e147]: "Issues found: 1 recall. 1 service records."
+            - paragraph [ref=e148]: Imported on Oct 12, 2025
+            - generic [ref=e149]:
+              - generic [ref=e150]:
+                - paragraph [ref=e151]: "0"
+                - paragraph [ref=e152]: Accidents
+              - generic [ref=e153]:
+                - paragraph [ref=e154]: "0"
+                - paragraph [ref=e155]: Owners
+              - generic [ref=e156]:
+                - paragraph [ref=e157]: "1"
+                - paragraph [ref=e158]: Service Records
+              - generic [ref=e159]:
+                - paragraph [ref=e160]: "1"
+                - paragraph [ref=e161]: Recalls
+            - generic [ref=e162]:
+              - heading "Key Findings:" [level=5] [ref=e163]
+              - generic [ref=e164]:
+                - paragraph [ref=e165]: • 1 recall(s) found
+                - paragraph [ref=e166]: • Clean history - no major issues found
+          - generic [ref=e169]:
+            - generic [ref=e170]:
+              - img [ref=e171]
+              - heading "GoodCar Report" [level=4] [ref=e174]
+              - generic [ref=e175]: HISTORY REPORT
+            - paragraph [ref=e176]: "Issues found: 1 accident reported, 1 recall. 1 service records."
+            - paragraph [ref=e177]: Imported on Oct 12, 2025
+            - generic [ref=e178]:
+              - generic [ref=e179]:
+                - paragraph [ref=e180]: "1"
+                - paragraph [ref=e181]: Accidents
+              - generic [ref=e182]:
+                - paragraph [ref=e183]: "0"
+                - paragraph [ref=e184]: Owners
+              - generic [ref=e185]:
+                - paragraph [ref=e186]: "1"
+                - paragraph [ref=e187]: Service Records
+              - generic [ref=e188]:
+                - paragraph [ref=e189]: "1"
+                - paragraph [ref=e190]: Recalls
+            - generic [ref=e191]:
+              - heading "Key Findings:" [level=5] [ref=e192]
+              - generic [ref=e193]:
+                - paragraph [ref=e194]: • 1 accident(s) reported
+                - paragraph [ref=e195]: • 1 recall(s) found
+          - generic [ref=e198]:
+            - generic [ref=e199]:
+              - img [ref=e200]
+              - heading "GoodCar Report" [level=4] [ref=e203]
+              - generic [ref=e204]: HISTORY REPORT
+            - paragraph [ref=e205]: "Issues found: 2 accidents reported, 1 recall. 1 service records."
+            - paragraph [ref=e206]: Imported on Oct 10, 2025
+            - generic [ref=e207]:
+              - generic [ref=e208]:
+                - paragraph [ref=e209]: "2"
+                - paragraph [ref=e210]: Accidents
+              - generic [ref=e211]:
+                - paragraph [ref=e212]: "0"
+                - paragraph [ref=e213]: Owners
+              - generic [ref=e214]:
+                - paragraph [ref=e215]: "1"
+                - paragraph [ref=e216]: Service Records
+              - generic [ref=e217]:
+                - paragraph [ref=e218]: "1"
+                - paragraph [ref=e219]: Recalls
+            - generic [ref=e220]:
+              - heading "Key Findings:" [level=5] [ref=e221]
+              - generic [ref=e222]:
+                - paragraph [ref=e223]: • 2 accident(s) reported
+                - paragraph [ref=e224]: • 1 recall(s) found
+          - generic [ref=e227]:
+            - generic [ref=e228]:
+              - img [ref=e229]
+              - heading "GoodCar Report" [level=4] [ref=e232]
+              - generic [ref=e233]: HISTORY REPORT
+            - paragraph [ref=e234]: "Issues found: 2 accidents reported, 1 recall. 1 service records."
+            - paragraph [ref=e235]: Imported on Oct 10, 2025
+            - generic [ref=e236]:
+              - generic [ref=e237]:
+                - paragraph [ref=e238]: "2"
+                - paragraph [ref=e239]: Accidents
+              - generic [ref=e240]:
+                - paragraph [ref=e241]: "0"
+                - paragraph [ref=e242]: Owners
+              - generic [ref=e243]:
+                - paragraph [ref=e244]: "1"
+                - paragraph [ref=e245]: Service Records
+              - generic [ref=e246]:
+                - paragraph [ref=e247]: "1"
+                - paragraph [ref=e248]: Recalls
+            - generic [ref=e249]:
+              - heading "Key Findings:" [level=5] [ref=e250]
+              - generic [ref=e251]:
+                - paragraph [ref=e252]: • 2 accident(s) reported
+                - paragraph [ref=e253]: • 1 recall(s) found
+      - generic [ref=e255]:
+        - generic [ref=e256]:
+          - heading "Import Vehicle History Report" [level=3] [ref=e257]
+          - button [ref=e258]:
+            - img [ref=e259]
+        - generic [ref=e262]:
+          - paragraph [ref=e263]: Upload a PDF or copy and paste your vehicle history report from GoodCar, Carfax, AutoCheck, or any other provider. The system will automatically parse the key information.
+          - generic [ref=e264]:
+            - img [ref=e265]
+            - paragraph [ref=e268]: Drag and drop your PDF here, or click to browse
+            - generic [ref=e269] [cursor=pointer]: Choose PDF File
+          - generic [ref=e274]: Or paste text
+          - generic [ref=e275]: Report Text/Data
+          - textbox "Report Text/Data" [ref=e276]:
+            - /placeholder: Paste your vehicle history report here...
+        - generic [ref=e277]:
+          - button "Cancel" [ref=e278]
+          - button "Import Report" [disabled] [ref=e279]
+  - button "Open Next.js Dev Tools" [ref=e285] [cursor=pointer]:
+    - img [ref=e286]
+  - alert [ref=e289]
+```

@@ -264,6 +264,7 @@ model ImportedReport {
   reportType   ImportedReportType
   reportData   String               // JSON string of parsed report data
   rawData      String?              // Original uploaded text/JSON
+  pdfPath      String?              // Path to original PDF file
   summary      String?              // Brief summary of key findings
   importedAt   DateTime             @default(now())
   updatedAt    DateTime             @updatedAt

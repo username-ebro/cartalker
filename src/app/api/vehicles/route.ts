@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { decodeVIN } from '@/lib/vinDecoder';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
     const vehicles = await prisma.vehicle.findMany({
       where: {
         user: {
-          email: 'demo@cartalker.com' // For MVP, use demo user
+          email: 'evan@evanstoudt.com' // For MVP, use demo user
         }
       },
       include: {
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     // Get user (for MVP, use demo user)
     const user = await prisma.user.findUnique({
-      where: { email: 'demo@cartalker.com' }
+      where: { email: 'evan@evanstoudt.com' }
     });
 
     if (!user) {
@@ -66,12 +67,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Decode VIN to get vehicle data
-    const vinResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/vin?vin=${vin}`);
-    const vinData = await vinResponse.json();
+    const vinData = await decodeVIN(vin);
 
     if (!vinData.success) {
       return NextResponse.json(
-        { success: false, error: 'Failed to decode VIN' },
+        { success: false, error: vinData.error || 'Failed to decode VIN' },
         { status: 400 }
       );
     }

@@ -14,7 +14,8 @@ import {
   DollarSign,
   FileText,
   Upload,
-  X
+  X,
+  Trash2
 } from 'lucide-react';
 
 interface Vehicle {
@@ -48,8 +49,11 @@ export function VehicleDetail({ vehicle: initialVehicle }: VehicleDetailProps) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [importedReports, setImportedReports] = useState<any[]>([]);
   const [reportText, setReportText] = useState('');
+  const [reportFile, setReportFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [isParsingPdf, setIsParsingPdf] = useState(false);
 
   // Edit form state
   const [editNickname, setEditNickname] = useState(vehicle.nickname || '');
@@ -97,28 +101,122 @@ export function VehicleDetail({ vehicle: initialVehicle }: VehicleDetailProps) {
     }
   };
 
+  // Handle PDF file parsing
+  const parsePdfFile = async (file: File) => {
+    setIsParsingPdf(true);
+    console.log('Starting PDF parse for:', file.name);
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      console.log('ArrayBuffer loaded, size:', arrayBuffer.byteLength);
+
+      // Dynamic import of pdfjs-dist (only loaded when needed)
+      console.log('Importing PDF.js...');
+      const pdfjsLib = await import('pdfjs-dist');
+      console.log('PDF.js version:', pdfjsLib.version);
+
+      // Use the worker from node_modules instead of CDN
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `/pdf.worker.min.js`;
+      console.log('Worker path: /pdf.worker.min.js');
+
+      // Convert ArrayBuffer to Uint8Array for PDF.js
+      const typedArray = new Uint8Array(arrayBuffer);
+      console.log('Loading PDF document...');
+
+      const loadingTask = pdfjsLib.getDocument({ data: typedArray });
+      const pdf = await loadingTask.promise;
+      console.log('PDF loaded, pages:', pdf.numPages);
+
+      let fullText = '';
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        console.log(`Processing page ${i}/${pdf.numPages}...`);
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map((item: any) => item.str).join(' ');
+        fullText += pageText + '\n\n';
+      }
+
+      console.log('PDF parsing complete, text length:', fullText.length);
+      setReportText(fullText);
+      return fullText;
+    } catch (error) {
+      console.error('Error parsing PDF:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Error reading PDF file: ${errorMessage}\n\nPlease try again or paste the text manually.`);
+      return null;
+    } finally {
+      setIsParsingPdf(false);
+    }
+  };
+
+  // Handle file drop
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files[0]) {
+      const file = files[0];
+      if (file.type === 'application/pdf') {
+        setReportFile(file);
+        await parsePdfFile(file);
+      } else {
+        alert('Please upload a PDF file');
+      }
+    }
+  };
+
+  // Handle drag events
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+
+  // Handle file input
+  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.type === 'application/pdf') {
+        setReportFile(file);
+        await parsePdfFile(file);
+      } else {
+        alert('Please upload a PDF file');
+      }
+    }
+  };
+
   // Handle report import
   const handleImportReport = async () => {
     if (!reportText.trim()) return;
 
     setIsImporting(true);
     try {
+      const formData = new FormData();
+      formData.append('vehicleId', vehicle.id);
+      formData.append('source', 'GoodCar');
+      formData.append('reportType', 'HISTORY_REPORT');
+      formData.append('reportData', reportText);
+      if (reportFile) {
+        formData.append('pdfFile', reportFile);
+      }
+
       const response = await fetch('/api/reports/import', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          vehicleId: vehicle.id,
-          source: 'GoodCar',
-          reportType: 'HISTORY_REPORT',
-          reportData: reportText,
-        }),
+        body: formData
+        // Note: Don't set Content-Type header, browser sets it with boundary
       });
 
       const data = await response.json();
       if (data.success) {
         setReportText('');
+        setReportFile(null);
         setShowImportModal(false);
         await loadReports(); // Reload reports
         alert('Report imported successfully!');
@@ -130,6 +228,30 @@ export function VehicleDetail({ vehicle: initialVehicle }: VehicleDetailProps) {
       alert('Error importing report. Please try again.');
     } finally {
       setIsImporting(false);
+    }
+  };
+
+  // Handle report deletion
+  const handleDeleteReport = async (reportId: string) => {
+    if (!confirm('Are you sure you want to delete this report? This cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/reports/${reportId}`, {
+        method: 'DELETE'
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        await loadReports(); // Refresh the list
+        alert('Report deleted successfully!');
+      } else {
+        alert(data.error || 'Failed to delete report');
+      }
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      alert('Error deleting report. Please try again.');
     }
   };
 
@@ -628,6 +750,28 @@ export function VehicleDetail({ vehicle: initialVehicle }: VehicleDetailProps) {
                           </div>
                         </div>
                       )}
+
+                      {/* Action Buttons */}
+                      <div className="mt-4 flex items-center space-x-3">
+                        {report.pdfPath && (
+                          <a
+                            href={report.pdfPath}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                          >
+                            <FileText className="w-4 h-4 mr-2" />
+                            View PDF
+                          </a>
+                        )}
+                        <button
+                          onClick={() => handleDeleteReport(report.id)}
+                          className="inline-flex items-center px-3 py-2 border border-red-300 rounded-md text-sm font-medium text-red-700 bg-white hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -662,9 +806,54 @@ export function VehicleDetail({ vehicle: initialVehicle }: VehicleDetailProps) {
 
             <div className="mb-4">
               <p className="text-gray-600 text-sm mb-4">
-                Copy and paste your vehicle history report from GoodCar, Carfax, AutoCheck, or any other provider.
+                Upload a PDF or copy and paste your vehicle history report from GoodCar, Carfax, AutoCheck, or any other provider.
                 The system will automatically parse the key information.
               </p>
+
+              {/* PDF Upload Zone */}
+              <div
+                className={`mb-4 border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                  dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
+                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-sm text-gray-600 mb-2">
+                  {isParsingPdf ? 'Parsing PDF...' : 'Drag and drop your PDF here, or click to browse'}
+                </p>
+                <input
+                  type="file"
+                  id="pdfUpload"
+                  accept="application/pdf"
+                  onChange={handleFileInput}
+                  className="hidden"
+                  disabled={isParsingPdf}
+                />
+                <label
+                  htmlFor="pdfUpload"
+                  className="inline-block px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer disabled:opacity-50"
+                >
+                  {isParsingPdf ? 'Processing...' : 'Choose PDF File'}
+                </label>
+                {reportFile && (
+                  <p className="text-sm text-green-600 mt-2">
+                    ✓ {reportFile.name}
+                  </p>
+                )}
+              </div>
+
+              {/* Or separator */}
+              <div className="relative mb-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">Or paste text</span>
+                </div>
+              </div>
 
               <label htmlFor="reportText" className="block text-sm font-medium text-gray-700 mb-2">
                 Report Text/Data
