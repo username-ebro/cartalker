@@ -45,8 +45,8 @@ export function generateTalkingPoints(
   // Determine overall strategy
   const isScammy = scamLikelihood > 60 || urgencyLevel === 'scam';
   const isLegitimate = urgencyLevel === 'urgent' || urgencyLevel === 'overdue' || urgencyLevel === 'safety-critical';
-  const isPriceHigh = quotedPrice && serviceCheck.estimatedFairPrice &&
-    quotedPrice > serviceCheck.estimatedFairPrice.max * 1.3;
+  const isPriceHigh = !!(quotedPrice && serviceCheck.estimatedFairPrice &&
+    quotedPrice > serviceCheck.estimatedFairPrice.max * 1.3);
 
   const points: TalkingPointsSet = {
     opening: generateOpening(serviceType, serviceCheck, isScammy, isLegitimate),

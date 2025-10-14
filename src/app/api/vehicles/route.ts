@@ -79,7 +79,8 @@ export async function POST(request: NextRequest) {
     // Create vehicle with decoded data and user inputs
     const vehicle = await prisma.vehicle.create({
       data: {
-        ...vinData.data,
+        ...(vinData.data as any),
+        vin, // Ensure VIN is set
         nickname,
         color,
         mileage: mileage ? parseInt(mileage) : undefined,

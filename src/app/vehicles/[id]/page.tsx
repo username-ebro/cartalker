@@ -50,5 +50,5 @@ export default async function VehicleDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  return <VehicleDetail vehicle={vehicle} />;
+  return <VehicleDetail vehicle={vehicle as any} />;
 }

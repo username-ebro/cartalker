@@ -481,7 +481,7 @@ export async function POST(request: NextRequest) {
       data: {
         vehicleId,
         source,
-        reportType,
+        reportType: reportType as any, // Cast to Prisma enum type
         reportData: JSON.stringify(parsedData),
         rawData: typeof reportData === 'string' ? reportData : JSON.stringify(reportData),
         pdfPath, // Store PDF path (null if no file uploaded)
