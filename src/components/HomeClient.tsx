@@ -50,7 +50,7 @@ export function HomeClient() {
           </div>
         </div>
 
-        {/* Crisis Mode Banner */}
+        {/* Car Talk Banner */}
         <div className="mb-8">
           <button
             onClick={() => setShowCrisisMode(true)}
@@ -59,7 +59,7 @@ export function HomeClient() {
             <div className="flex items-center justify-center gap-4">
               <AlertTriangle className="w-8 h-8 animate-pulse" />
               <div className="text-left">
-                <h3 className="text-2xl font-mono font-bold mb-1">CRISIS MODE</h3>
+                <h3 className="text-2xl font-mono font-bold mb-1">CAR TALK</h3>
                 <p className="text-sm opacity-90">
                   At the shop right now? Get instant analysis on service recommendations
                 </p>

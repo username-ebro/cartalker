@@ -263,12 +263,12 @@ export function CrisisMode({ onClose }: CrisisModeProps) {
         <div className="flex-shrink-0 bg-danger-red text-white px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-6 h-6" />
-            <h2 className="text-2xl font-mono font-bold">Crisis Mode</h2>
+            <h2 className="text-2xl font-mono font-bold">Car Talk</h2>
           </div>
           <button
             onClick={onClose}
             className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-            aria-label="Close Crisis Mode"
+            aria-label="Close Car Talk"
           >
             <X className="w-6 h-6" />
           </button>
