@@ -7,10 +7,10 @@ const prisma = new PrismaClient();
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // First, get the document to find file paths
     const document = await prisma.document.findUnique({
@@ -60,10 +60,10 @@ export async function DELETE(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const document = await prisma.document.findUnique({
       where: { id },
