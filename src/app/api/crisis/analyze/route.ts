@@ -119,7 +119,7 @@ function parseServiceType(description: string): string | null {
  * Some services (like ENGINE_FLUSH) don't exist in the enum, so we return null
  */
 function mapToPrismaMaintenanceType(serviceType: string): string | null {
-  const mapping: Record<string, string> = {
+  const mapping: Record<string, string | null> = {
     // Direct matches
     'OIL_CHANGE': 'OIL_CHANGE',
     'OIL_FILTER': 'OIL_FILTER',
